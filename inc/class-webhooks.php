@@ -41,7 +41,17 @@ if ( ! class_exists( 'PK_MC_OW_Webhook' ) ) {
 		 * @var string
 		 */
         private static $webhook_action = 'postback_action';
-		
+
+        /**
+         * @var string
+         */
+        private $comment = '';
+
+        /**
+         * @var string
+         */
+        private $a_comment = '';
+
 		/**
 		 * Construdor :)
 		 */
@@ -60,40 +70,58 @@ if ( ! class_exists( 'PK_MC_OW_Webhook' ) ) {
         public function webhook_handler() {
             $input = $_POST;
             //start your payload processing here
-            $wall = sanitize_text_field($input['wall']);
+            foreach ($input as $key => $value){
+                $input[$key] = sanitize_text($value);
+            }
+            $wall = $input['wall'];
             //payload condition
             $p_c = false;
+            $cmt = 'offerwall point awarded: ';
+            $a_comment = '';
             switch(strtolower($wall)){
                 case 'cpagrip':
                     $p_c = $this->cpa_grip_handler($input);
+                    $cmt .= $this->comment;
                 break;
                 case 'adscendmedia':
                 //    $p_c = $this->adscend_media_handler($input);
+                //    $a_comment = 'Adscend Media';
                 break;
             }
             if($p_c){//passed
+                $a_comment = $this->a_comment;
                 $points = sanitize_text($_GET['points']);
-                $this->award_points($points);
+                $this->award_points($points,$a_comment,$cmt);
             }
         }
         /** 
          * CPAGRIP handler
          * 
+         * @param array $input
          * @return bool
          */
         public function cpa_grip_handler($input){
             $pass = 'freerobux-cpa';
-            if($input['password'] == $pass){//accept
-
+            $e_user_agent = trim(strtolower('CPAGRIP/Postback Tool/2.0'));
+            $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? trim(strtolower($_SERVER['HTTP_USER_AGENT'])) : '';
+            if($input['password'] == $pass && $e_user_agent == $user_agent){//accept
+                $this->a_comment = 'cpa_grip_'.$input['offer_id'];
+                $this->comment = $input['offer_name'];
+                return true;
             }
+            return false;
         }
         /**
          * Awards points
          * 
+         * @param int $points
+         * @param string $approved_comment (optional)
+         * @param string $comment (optional)
          * @return bool
          */
-        public function award_points($points){
-
+        public function award_points($points,$approved_comment = 'offerwall_point',$comment = '10 points for completion'){
+            $user_id = get_current_user_id();
+            return mycred_add( $approved_comment, $user_id, $points, $comment );
         }
 
         public function parse_request( &$wp ) {
