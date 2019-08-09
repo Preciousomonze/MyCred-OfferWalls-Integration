@@ -34,6 +34,14 @@ if ( ! class_exists( 'PK_MC_OW_Webhook' ) ) {
 		 * @var string
 		 */
         private static $webhook_tag = 'post_hook';
+
+		/**
+		 * ini prefix, leave as it is :)
+		 * 
+		 * @var string
+		 */
+        private static $ini_hook_prefix = 'pekky_';
+
 		/**
 		 * Action to be triggered when the url is loaded
 		 * replace with a unique value you want
@@ -58,7 +66,7 @@ if ( ! class_exists( 'PK_MC_OW_Webhook' ) ) {
         public function __construct() {
         	add_action( 'init', array( $this, 'setup' ) );
             add_action( 'parse_request', array( $this, 'parse_request' ) );            
-            add_action( self::$webhook_action, array( $this, 'webhook_handler' ) );
+            add_action( self::$ini_hook_prefix.self::$webhook_action, array( $this, 'webhook_handler' ) );
         }
         public function setup() {
             $this->add_rewrite_rules_tags();
@@ -68,10 +76,10 @@ if ( ! class_exists( 'PK_MC_OW_Webhook' ) ) {
          * Handles the HTTP Request sent to your site's webhook
          */
         public function webhook_handler() {
-            $input = $_POST;
+            $input = (strpos($_SERVER['SERVER_NAME'],'localhost') !== false) ? $_GET : $_POST;
             //start your payload processing here
             foreach ($input as $key => $value){
-                $input[$key] = sanitize_text($value);
+                $input[$key] = sanitize_text_field($value);
             }
             $wall = $input['wall'];
             //payload condition
@@ -90,7 +98,7 @@ if ( ! class_exists( 'PK_MC_OW_Webhook' ) ) {
             }
             if($p_c){//passed
                 $a_comment = $this->a_comment;
-                $points = sanitize_text($_GET['points']);
+                $points = sanitize_text_field($_GET['points']);
                 $this->award_points($points,$a_comment,$cmt);
             }
         }
@@ -125,8 +133,8 @@ if ( ! class_exists( 'PK_MC_OW_Webhook' ) ) {
         }
 
         public function parse_request( &$wp ) {
-			$ini = 'pekky_';
-            if( array_key_exists( self::$webhook_tag, $wp->query_vars ) ) {                
+			$ini = self::$ini_hook_prefix;
+            if( array_key_exists( self::$webhook_tag, $wp->query_vars ) ) {
                 do_action( $ini.self::$webhook_action );
                 die(0);
             }
