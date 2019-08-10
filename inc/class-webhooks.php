@@ -60,6 +60,11 @@ if ( ! class_exists( 'PK_MC_OW_Webhook' ) ) {
          */
         private $a_comment = '';
 
+        /**
+         * @var int
+         */
+        private $tracked_user_id = 0;
+
 		/**
 		 * Construdor :)
 		 */
@@ -99,6 +104,7 @@ if ( ! class_exists( 'PK_MC_OW_Webhook' ) ) {
             if($p_c){//passed
                 $a_comment = $this->a_comment;
                 $points = sanitize_text_field($_GET['points']);
+                $this->get_tracked_user($input);
                 $this->award_points($points,$a_comment,$cmt);
             }
         }
@@ -128,10 +134,30 @@ if ( ! class_exists( 'PK_MC_OW_Webhook' ) ) {
          * @return bool
          */
         public function award_points($points,$approved_comment = 'offerwall_point',$comment = '10 points for completion'){
-            $user_id = get_current_user_id();
+            $user_id = $this->tracked_user_id;
             return mycred_add( $approved_comment, $user_id, $points, $comment );
         }
 
+        /**
+         * Gets the tracked user data that got the offer :)
+         * 
+         * should either be the user_id or username
+         * 
+         * @param array $input
+         * @return int user id
+         */
+        public function get_tracked_user($input){
+            $t_id = $input['tracking_id'];
+            $user = '';
+            $field = 'login';
+            if(is_int($t_id))
+                $field = 'id';
+            $user = get_user_by($field,$t_id);
+            if($user)
+                return $user->ID;
+            return 0;
+        }
+        
         public function parse_request( &$wp ) {
 			$ini = self::$ini_hook_prefix;
             if( array_key_exists( self::$webhook_tag, $wp->query_vars ) ) {
