@@ -153,8 +153,10 @@ if ( ! class_exists( 'PK_MC_OW_Webhook' ) ) {
             if(is_int($t_id))
                 $field = 'id';
             $user = get_user_by($field,$t_id);
-            if($user)
+            if($user){
+$this->tracked_user_id = $user->ID;
                 return $user->ID;
+}
             return 0;
         }
         
