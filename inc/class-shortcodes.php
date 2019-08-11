@@ -5,10 +5,13 @@ if ( ! defined( 'ABSPATH' ) ) {
     class PK_MC_OW_Shortcodes {
         public function __construct() {
             add_action('init', function(){
-                add_action( 'rest_api_init', array($this, 'rest_api'));
+                //add_action( 'rest_api_init', array($this, 'rest_api'));
                 //add_filter('the_content', 'do_shortcode');//for wp_bakery to run shortcodes
                 add_shortcode( PK_MC_OW_USERNAME_SHORTCODE, array( $this, 'current_username' ) );  
-            });
+            }); 
+            /*add_action( 'after_setup_theme', function(){
+                add_filter('the_content', 'do_shortcode');//for wp_bakery to run shortcodes
+            });*/
         }
 
         /**

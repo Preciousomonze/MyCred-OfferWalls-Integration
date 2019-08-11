@@ -96,9 +96,9 @@ if ( ! class_exists( 'PK_MC_OW_Webhook' ) ) {
                     $p_c = $this->cpa_grip_handler($input);
                     $cmt .= $this->comment;
                 break;
-                case 'adscendmedia':
-                //    $p_c = $this->adscend_media_handler($input);
-                //    $a_comment = 'Adscend Media';
+                case 'adscend_media':
+                    $p_c = $this->adscend_media_handler($input);
+                    $a_comment = 'Adscend Media';
                 break;
             }
             if($p_c){//passed
@@ -107,6 +107,21 @@ if ( ! class_exists( 'PK_MC_OW_Webhook' ) ) {
                 $this->get_tracked_user($input);
                 $this->award_points($points,$a_comment,$cmt);
             }
+        }
+        /**
+         * Adscend media handler
+         * 
+         * @param array $input
+         * @return bool
+         */
+        public function adscend_media_handler($input){
+            $ip = '54.204.57.82';//ip from adscend media
+            if($input['ip'] == $ip){//pass through
+                $this->a_comment = 'adscend_media_'.$input['offerid'];
+                $this->comment = $input['name'];
+                return true;
+            }
+            return false;
         }
         /** 
          * CPAGRIP handler
@@ -153,8 +168,10 @@ if ( ! class_exists( 'PK_MC_OW_Webhook' ) ) {
             if(is_int($t_id))
                 $field = 'id';
             $user = get_user_by($field,$t_id);
-            if($user)
+            if($user){
+                $this->tracked_user_id = $user->ID;
                 return $user->ID;
+            }
             return 0;
         }
         

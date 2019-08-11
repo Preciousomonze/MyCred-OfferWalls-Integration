@@ -30,7 +30,7 @@ if(PK_MC_OW_Dependencies::is_mycred_active()){
 else{
     function pk_mc_ow_notice(){
         echo '<div class="error"><p>';
-        _e('<strong>MyCred Offer Walls Integration</strong> plugin requires <a href="#" target="_blank">My creds</a> plugin to be active!', '');
+        _e('<strong>MyCred Offer Walls Integration</strong> plugin requires <a href="https://mycred.me" target="_blank">My creds</a> plugin to be active!', '');
         echo '</p></div>';
     }
     add_action('admin_notices', 'pk_mc_ow_notice', 15);
