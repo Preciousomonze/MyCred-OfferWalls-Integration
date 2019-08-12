@@ -162,7 +162,15 @@ if ( ! class_exists( 'PK_MC_OW_Webhook' ) ) {
          * @return int user id
          */
         public function get_tracked_user($input){
-            $t_id = $input['tracking_id'];
+            $t_id = '';
+            switch(trim(strtolower($input['wall']))){
+                case 'adscend_media':
+                    $t_id = $input['sub1'];
+                break;
+                case 'cpagrip':
+                    $t_id = $input['tracking_id'];
+                break;
+            }
             $user = '';
             $field = 'login';
             if(is_int($t_id))
